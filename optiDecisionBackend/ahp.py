@@ -1,24 +1,26 @@
 import numpy as np
 
+def pairwise_comparison(names):
+    n = len(names)
+    comparisons = np.zeros((n, n))
+
+    for i in range(n):
+        for j in range(i + 1, n):
+            comparisons[i, j] = float(input(f"Enter the comparison value between {names[i]} and {names[j]}: "))
+            comparisons[j, i] = 1 / comparisons[i, j]
+
+    return comparisons
+
+
+def calculate_priority_weights(comparisons):
+    normalized_matrix = comparisons / comparisons.sum(axis=0)
+    priority_weights = normalized_matrix.mean(axis=1)
+    return priority_weights
+
+
 class AHP:
     def __init__(self):
         pass
-
-    def pairwise_comparison(self, names):
-        n = len(names)
-        comparisons = np.zeros((n, n))
-
-        for i in range(n):
-            for j in range(i + 1, n):
-                comparisons[i, j] = float(input(f"Enter the comparison value between {names[i]} and {names[j]}: "))
-                comparisons[j, i] = 1 / comparisons[i, j]
-
-        return comparisons
-
-    def calculate_priority_weights(self, comparisons):
-        normalized_matrix = comparisons / comparisons.sum(axis=0)
-        priority_weights = normalized_matrix.mean(axis=1)
-        return priority_weights
 
     def check_consistency(self, comparisons):
         row_sums = comparisons.sum(axis=1)
@@ -41,8 +43,8 @@ class AHP:
             criterion_name = input(f"Enter the name of criterion {i + 1}: ")
             criteria_names.append(criterion_name)
 
-        criteria_comparisons = self.pairwise_comparison(criteria_names)
-        criteria_weights = self.calculate_priority_weights(criteria_comparisons)
+        criteria_comparisons = pairwise_comparison(criteria_names)
+        criteria_weights = calculate_priority_weights(criteria_comparisons)
 
         for i, criterion_name in enumerate(criteria_names):
             criterion_weight = criteria_weights[i]
@@ -59,13 +61,13 @@ class AHP:
                     f"Enter the name of subcriterion {j + 1} for criterion {criterion_name}: ")
                 subcriteria_names.append(subcriterion_name)
 
-            subcriteria_comparisons = self.pairwise_comparison(subcriteria_names)
+            subcriteria_comparisons = pairwise_comparison(subcriteria_names)
             if num_subcriteria == 2:  # Adjust weights directly for only two subcriteria
                 total_comparison = subcriteria_comparisons[0, 1] + subcriteria_comparisons[1, 0]
                 subcriteria_weights = [subcriteria_comparisons[0, 1] / total_comparison,
                                        subcriteria_comparisons[1, 0] / total_comparison]
             else:
-                subcriteria_weights = self.calculate_priority_weights(subcriteria_comparisons / subcriteria_comparisons.sum(axis=1))
+                subcriteria_weights = calculate_priority_weights(subcriteria_comparisons / subcriteria_comparisons.sum(axis=1))
 
             for j, subcriterion_name in enumerate(subcriteria_names):
                 subcriterion_weight = subcriteria_weights[j]
